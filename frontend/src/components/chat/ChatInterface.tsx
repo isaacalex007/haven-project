@@ -11,12 +11,14 @@ import { cn } from "~/lib/utils";
 import { PropertyScorecardData } from "~/types";
 import { LifestyleScorecard } from "./LifestyleScorecard";
 
+// Define message structure
 interface Message {
   id: string;
   role: "user" | "agent";
   content: string;
 }
 
+// Helper to format history for the API
 const formatHistoryForAPI = (messages: Message[]): [string, string][] => {
     const history: [string, string][] = [];
     for (let i = 0; i < messages.length; i++) {
@@ -57,9 +59,11 @@ export function ChatInterface() {
     setIsLoading(true);
 
     const history = formatHistoryForAPI(messages);
-    const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "https://8000-firebase-haven-1753564061535.cluster-rhptpnrfenhe4qarq36djxjqmg.cloudworkstations.dev";
+    const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
 
     try {
+      if (!backendUrl) throw new Error("Backend URL is not configured.");
+
       const response = await fetch(`${backendUrl}/api/v1/chat`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -86,7 +90,7 @@ export function ChatInterface() {
       const errorMessage: Message = {
           id: (Date.now() + 1).toString(),
           role: 'agent',
-          content: "I'm having trouble connecting to my systems. Please check the backend server."
+          content: "I'm having trouble connecting to my systems. Please try again in a moment."
       };
       setMessages(prev => [...prev, errorMessage]);
 
@@ -116,9 +120,13 @@ export function ChatInterface() {
                 let scorecardData: PropertyScorecardData | null = null;
                 if (message.role === 'agent') {
                   try {
-                    const parsed = JSON.parse(message.content);
-                    if (parsed.type === 'property_scorecard') {
-                      scorecardData = parsed;
+                    // This regex finds a JSON object within the string
+                    const jsonMatch = message.content.match(/\{[\s\S]*\}/);
+                    if (jsonMatch) {
+                      const parsed = JSON.parse(jsonMatch[0]);
+                      if (parsed.type === 'property_scorecard') {
+                        scorecardData = parsed;
+                      }
                     }
                   } catch (e) { /* Not a JSON message */ }
                 }
@@ -128,10 +136,7 @@ export function ChatInterface() {
                     {scorecardData ? (
                       <LifestyleScorecard data={scorecardData} />
                     ) : (
-                      <div className={cn(
-                          "max-w-lg p-4 rounded-2xl", 
-                          message.role === 'user' ? 'bg-slate-200 text-gray-800' : 'bg-white text-gray-800 shadow-sm'
-                      )}>
+                      <div className={cn("max-w-lg p-4 rounded-2xl", message.role === 'user' ? 'bg-slate-200 text-gray-800' : 'bg-white text-gray-800 shadow-sm')}>
                         <article className="prose prose-sm max-w-none">
                           <ReactMarkdown remarkPlugins={[remarkGfm]}>{message.content}</ReactMarkdown>
                         </article>
