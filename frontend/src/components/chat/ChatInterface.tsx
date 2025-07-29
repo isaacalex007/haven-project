@@ -1,4 +1,3 @@
-// frontend/src/components/chat/ChatInterface.tsx
 'use client';
 
 import { useState, useRef, useEffect } from "react";
@@ -8,14 +7,9 @@ import { ScrollArea } from "~/components/ui/scroll-area";
 import { PaperPlaneIcon } from "@radix-ui/react-icons";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from 'remark-gfm';
-import { toast } from "sonner";
 import { cn } from "~/lib/utils";
-
 import { PropertyScorecardData } from "~/types";
 import { LifestyleScorecard } from "./LifestyleScorecard";
-
-// ... (The rest of your component logic remains the same) ...
-// The only changes are to the import paths at the top of the file.
 
 interface Message {
   id: string;
@@ -76,7 +70,6 @@ export function ChatInterface() {
       });
 
       if (!response.ok) {
-        toast.error("API Error", { description: `The server responded with status: ${response.status}` });
         throw new Error(`Server error: ${response.statusText}`);
       }
 
@@ -90,7 +83,6 @@ export function ChatInterface() {
 
     } catch (error) {
       console.error("Fetch failed:", error);
-      toast.error("Connection Failed", { description: "Could not connect to the backend." });
       const errorMessage: Message = {
           id: (Date.now() + 1).toString(),
           role: 'agent',
@@ -128,19 +120,19 @@ export function ChatInterface() {
                     if (parsed.type === 'property_scorecard') {
                       scorecardData = parsed;
                     }
-                  } catch (e) { /* Not a JSON message, render as plain text */ }
+                  } catch (e) { /* Not a JSON message */ }
                 }
 
                 return (
-                  <div key={message.id} className={cn("flex", message.role === 'user' ? 'justify-end' : 'justify-start')}>
+                  <div key={message.id} className={cn("flex w-full", message.role === 'user' ? 'justify-end' : 'justify-start')}>
                     {scorecardData ? (
                       <LifestyleScorecard data={scorecardData} />
                     ) : (
                       <div className={cn(
-                          "max-w-lg", 
-                          message.role === 'user' ? 'bg-slate-200 p-4 rounded-2xl' : ''
+                          "max-w-lg p-4 rounded-2xl", 
+                          message.role === 'user' ? 'bg-slate-200 text-gray-800' : 'bg-white text-gray-800 shadow-sm'
                       )}>
-                        <article className="prose prose-sm max-w-none text-gray-800">
+                        <article className="prose prose-sm max-w-none">
                           <ReactMarkdown remarkPlugins={[remarkGfm]}>{message.content}</ReactMarkdown>
                         </article>
                       </div>
