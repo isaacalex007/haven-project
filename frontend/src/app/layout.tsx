@@ -1,29 +1,25 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
-import "./globals.css";
-import { cn } from "~/lib/utils";
-import { Toaster } from "~/components/ui/sonner"
+import "./globals.css"; // <-- This import is essential
+import { Toaster } from "~/components/ui/sonner"; // <-- For toast notifications
 
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "Haven",
-  description: "An agentic real estate app.",
+  description: "Your AI Real Estate Agent",
 };
 
 export default function RootLayout({
   children,
-}: {
+}: Readonly<{
   children: React.ReactNode;
-}) {
+}>) {
   return (
     <html lang="en">
-      <body className={cn(
-        "min-h-screen bg-background font-sans antialiased",
-        inter.className
-      )}>
+      <body className={inter.className}>
         {children}
-        <Toaster />
+        <Toaster /> {/* <-- Add Toaster for notifications */}
       </body>
     </html>
   );
