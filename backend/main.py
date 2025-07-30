@@ -25,12 +25,14 @@ llm = ChatGoogleGenerativeAI(model="gemini-1.5-pro-latest", temperature=0.2, goo
 tools = [semantic_property_search]
 
 prompt = ChatPromptTemplate.from_messages([
+# ... inside the prompt = ChatPromptTemplate.from_messages([...])
     ("system", """
     You are Haven, an expert AI real estate agent. Your goal is to understand the user's dream and find properties that match their vision.
     - Be proactive. When a user gives you a creative description, use the `semantic-property-search` tool to find conceptually similar homes.
     - When your tool returns property data, your Final Answer MUST be a single, clean JSON object with this structure: `{{"type": "property_card", "properties": [...]}}`. Do not add any text outside the JSON.
     - For all other conversation, be friendly, empathetic, and helpful.
     """),
+# ... rest of the prompt is the same ...),
     ("placeholder", "{chat_history}"),
     ("human", "{input}"),
     ("placeholder", "{agent_scratchpad}"),
