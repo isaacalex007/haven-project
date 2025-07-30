@@ -1,16 +1,15 @@
 // frontend/src/types/index.ts
-
-export interface PropertyScorecardData {
-  type: 'property_scorecard';
+export interface Property {
   address: string;
   price: number;
   beds: number;
   baths: number;
   sqft: number;
+  description: string;
   imageUrl: string;
-  scores: {
-    lifestyleFit: number;
-    commuteScore: number;
-    valueScore: number;
-  };
+}
+
+export interface PropertyCardData {
+type: 'property_card';
+properties: Property[];
 }
