@@ -6,7 +6,6 @@ import { Button } from '~/components/ui/button';
 
 export function PropertyCard({ property }: { property: Property }) {
   const formatPrice = (price: number) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(price);
-
   return (
     <Card className="w-full max-w-lg shadow-lg bg-white overflow-hidden">
       <CardHeader className="p-0">
@@ -23,9 +22,7 @@ export function PropertyCard({ property }: { property: Property }) {
         </div>
       </CardContent>
       <CardFooter className="p-4 bg-gray-50">
-        <Button variant="outline" className="w-full" onClick={() => window.open(`https://www.google.com/maps?q=${encodeURIComponent(property.address)}`, '_blank')}>
-          View on Map
-        </Button>
+        <Button variant="outline" className="w-full" onClick={() => window.open(`http://googleusercontent.com/maps.google.com/2{encodeURIComponent(property.address)}`, '_blank')}>View on Map</Button>
       </CardFooter>
     </Card>
   );

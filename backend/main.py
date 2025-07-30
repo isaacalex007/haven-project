@@ -9,8 +9,7 @@ from dotenv import load_dotenv
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_core.prompts import ChatPromptTemplate
 from langchain.agents import AgentExecutor, create_tool_calling_agent
-
-from tools.property_tools import semantic_property_search
+from tools.property_tools import property_search, maps_service, yelp_service
 
 load_dotenv()
 
@@ -21,18 +20,16 @@ class ChatRequest(BaseModel):
 class ChatResponse(BaseModel):
     response: str
 
-llm = ChatGoogleGenerativeAI(model="gemini-1.5-pro-latest", temperature=0.2, google_api_key=os.getenv("GEMINI_API_KEY"))
-tools = [semantic_property_search]
+llm = ChatGoogleGenerativeAI(model="gemini-1.5-pro-latest", temperature=0.4, google_api_key=os.getenv("GEMINI_API_KEY"))
+tools = [property_search, maps_service, yelp_service]
 
 prompt = ChatPromptTemplate.from_messages([
-# ... inside the prompt = ChatPromptTemplate.from_messages([...])
     ("system", """
-    You are Haven, an expert AI real estate agent. Your goal is to understand the user's dream and find properties that match their vision.
-    - Be proactive. When a user gives you a creative description, use the `semantic-property-search` tool to find conceptually similar homes.
-    - When your tool returns property data, your Final Answer MUST be a single, clean JSON object with this structure: `{{"type": "property_card", "properties": [...]}}`. Do not add any text outside the JSON.
-    - For all other conversation, be friendly, empathetic, and helpful.
+    You are Haven, an expert AI real estate agent. Your goal is to be a proactive, insightful guide.
+    - First, use the `property_search` tool to find a home that matches the user's dream.
+    - **After finding a property**, you MUST use the `maps_service` and `yelp_service` tools to gather lifestyle data about that property's address.
+    - Finally, synthesize all information from all tools into a single, clean JSON object with this structure: `{{"type": "property_card", "properties": [...]}}`. Do not add any text outside the JSON.
     """),
-# ... rest of the prompt is the same ...),
     ("placeholder", "{chat_history}"),
     ("human", "{input}"),
     ("placeholder", "{agent_scratchpad}"),
@@ -47,12 +44,17 @@ app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_credentials=True, 
 @app.post("/api/v1/chat", response_model=ChatResponse, tags=["AI"])
 async def chat(request: ChatRequest):
     try:
+        # This corrected loop is easier to read and works correctly.
         history = []
         for human_msg, ai_msg in request.chat_history:
             history.append(("human", human_msg))
             history.append(("ai", ai_msg))
-        response = await agent_executor.ainvoke({"input": request.message, "chat_history": history})
+
+        response = await agent_executor.ainvoke({
+            "input": request.message,
+            "chat_history": history
+        })
         return {"response": response.get("output")}
     except Exception as e:
         print(f"An error occurred: {e}")
-        return {"response": "Sorry, I encountered an error. Please try again."}
+        return {"response": "An error occurred."}

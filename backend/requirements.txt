@@ -6,3 +6,5 @@ python-dotenv
 langchain-community
 requests
 python-dotenv
+langgraph
+langchain-google-community

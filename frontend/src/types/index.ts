@@ -8,7 +8,6 @@ export interface Property {
   description: string;
   imageUrl: string;
 }
-
 export interface PropertyCardData {
 type: 'property_card';
 properties: Property[];
